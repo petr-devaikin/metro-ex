@@ -6,7 +6,7 @@ function findStation(lineNumber, name) {
 function processStations() {
     for (var i = 0; i < coords.length; i++) {
         coords[i].year = parseInt(coords[i][2].split(' ')[2]);
-        coords[i].position = toKm(coords[i][4], coords[i][5]);
+        coords[i].position = toPixelPosition(coords[i][4], coords[i][5]);
     }
 }
 
@@ -17,10 +17,22 @@ function getLines() {
         for (var p = 0; p < lines[i].stations.length; p++) {
             var stationGroup = lines[i].stations[p];
             for (var j = 1; j < stationGroup.length; j++) {
-                connections.push({
+                var connection = {
                     start: findStation(lines[i].number, stationGroup[j - 1]),
                     stop: findStation(lines[i].number, stationGroup[j]),
-                });
+                };
+                connection.year = Math.max(connection.start.year, connection.stop.year);
+                if (j > 1 && connections[connections.length - 1].start.year < connection.start.year &&
+                             connection.stop.year < connection.start.year) {
+                    var anotherConnection = {
+                        start: connections[connections.length - 1].start,
+                        stop: connection.stop,
+                        until: connection.start.year - 1,
+                    };
+                    anotherConnection.year = Math.max(anotherConnection.start.year, anotherConnection.stop.year);
+                    connections.push(anotherConnection);
+                }
+                connections.push(connection);
             }
         }
         result.push({

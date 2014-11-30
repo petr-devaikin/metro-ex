@@ -42,6 +42,8 @@ svg {
 }
 
 svg .connection {
-    stroke: black;
-    stroke-width: 1;
+    stroke-width: 3;
+}
+
+svg .station circle {
 }

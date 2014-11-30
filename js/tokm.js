@@ -1,16 +1,17 @@
-var mskCentreLat = 55.7522200,
+var mskCentreLat = 55.719,
     mskCentreLong = 37.6155600,
-    defaultZoom = 20;
+    defaultZoom = 15;
 
-function toKm(latitude, longitude, zoom) {
+function toPixelPosition(latitude, longitude) {
     var kmInLat = 111.35,
         kmInLong = 62.79;
 
-    if (zoom === undefined)
-        zoom = defaultZoom;
-
     return {
-        x: (longitude - mskCentreLong) * kmInLong * zoom,
-        y: -(latitude - mskCentreLat) * kmInLat * zoom,
+        x: toPixelSize((longitude - mskCentreLong) * kmInLong),
+        y: -toPixelSize((latitude - mskCentreLat) * kmInLat),
     }
+}
+
+function toPixelSize(a) {
+    return a * defaultZoom;
 }

@@ -1,5 +1,5 @@
 window.onload = initialize;
-window.onresize = fit;
+//window.onresize = fit;
 
 var dom = {}
 var state = {}
@@ -9,6 +9,7 @@ function fit() {
         height = document.getElementById('mapContainer').offsetHeight;
 
     dom.metro.attr('transform', 'translate(' + width/2 + ',' + height/2 + ')');
+    d3.select('#moscow').attr('transform', 'translate(' + width/2 + ',' + height/2 + '), scale(0.54, 0.579)');
 }
 
 function inidDom() {
@@ -23,10 +24,27 @@ function initialize() {
     state.years = getPeriod();
     drawTimescale();
     addStations();
+    addWalkability();
     connectStations();
+    //drawRoads();
+
+    var zoom = d3.behavior.zoom()
+        .translate([0, 0])
+        .scale(1)
+        .scaleExtent([0.3, 8])
+        .on("zoom", zoomHandler);
+
+    dom.svg
+        .call(zoom) // delete this line to disable free zooming
+        .call(zoom.event);
 
     fit();
     selectYear(0);
+}
+
+function zoomHandler() {
+    //console.log(d3.event.scale);
+    dom.svg.select("#everything").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
 //drawing
@@ -42,6 +60,21 @@ function drawTimescale() {
             .on('click', function(d, i) { selectYear(i); });
 }
 
+function drawRoads() {
+    d3.select('#roads').select('#mkad').selectAll('road')
+            .data(mkad_km)
+        .enter().append('line')
+            .classed('road', true)
+            .attr('x1', function(d) { return toPixelPosition(d[2], d[1]).x; })
+            .attr('y1', function(d) { return toPixelPosition(d[2], d[1]).y; })
+            .attr('x2', function(d, i) {
+                return toPixelPosition(mkad_km[(i + 1) % mkad_km.length][2], mkad_km[(i + 1) % mkad_km.length][1]).x;
+            })
+            .attr('y2', function(d, i) {
+                return toPixelPosition(mkad_km[(i + 1) % mkad_km.length][2], mkad_km[(i + 1) % mkad_km.length][1]).y;
+            });
+}
+
 function addStations() {
     dom.stations = dom.metro.select('#stationsContainer').selectAll('.station')
             .data(coords)
@@ -53,6 +86,54 @@ function addStations() {
             return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
         })
         .attr('r', toPixelSize(0.1))
+        .attr('cx', function(d) { return d.position.x; })
+        .attr('cy', function(d) { return d.position.y; });
+}
+
+function addWalkability() {
+    dom.walk5min = dom.metro.select('#walk5min').selectAll('.walkArea')
+            .data(coords)
+        .enter().append('g')
+            .classed('walkArea', true);
+    dom.walk10min = dom.metro.select('#walk10min').selectAll('.walkArea')
+            .data(coords)
+        .enter().append('g')
+            .classed('walkArea', true);
+    dom.walk15min = dom.metro.select('#walk15min').selectAll('.walkArea')
+            .data(coords)
+        .enter().append('g')
+            .classed('walkArea', true);
+    dom.walk20min = dom.metro.select('#walk20min').selectAll('.walkArea')
+            .data(coords)
+        .enter().append('g')
+            .classed('walkArea', true);
+    
+    dom.walk5min.append('circle')
+        .attr('fill', function(d) {
+            return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('r', toPixelSize(0.333))
+        .attr('cx', function(d) { return d.position.x; })
+        .attr('cy', function(d) { return d.position.y; });
+    dom.walk10min.append('circle')
+        .attr('fill', function(d) {
+            return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('r', toPixelSize(0.667))
+        .attr('cx', function(d) { return d.position.x; })
+        .attr('cy', function(d) { return d.position.y; });
+    dom.walk15min.append('circle')
+        .attr('fill', function(d) {
+            return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('r', toPixelSize(1))
+        .attr('cx', function(d) { return d.position.x; })
+        .attr('cy', function(d) { return d.position.y; });
+    dom.walk20min.append('circle')
+        .attr('fill', function(d) {
+            return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('r', toPixelSize(1.333))
         .attr('cx', function(d) { return d.position.x; })
         .attr('cy', function(d) { return d.position.y; });
 }
@@ -89,6 +170,10 @@ function selectYear(year) {
 
     var stationsToHide = dom.stations.filter(function(d) {return d.year > state.years[year]; });
     var stationsToShow = dom.stations.filter(function(d) { return d.year <= state.years[year]; });
+
+    var walksToHide = d3.selectAll('.walkArea').filter(function(d) {return d.year > state.years[year]; });
+    var walksToShow = d3.selectAll('.walkArea').filter(function(d) { return d.year <= state.years[year]; });
+
     var connectionsToHide = dom.connections.filter(function(d) {
         return d.year > state.years[year] || (d.until < state.years[year] && d.until !== undefined);
     });
@@ -97,9 +182,11 @@ function selectYear(year) {
     });
 
     stationsToHide.attr('opacity', 0);
+    walksToHide.attr('opacity', 0);
     connectionsToHide.attr('opacity', 0);
     stationsToShow.attr('opacity', 1);
-    connectionsToShow.attr('opacity', 1);
+    walksToShow.attr('opacity', 1);
+    connectionsToShow.attr('opacity', 0.05);
 }
 
 document.addEventListener("keydown", function(e) {

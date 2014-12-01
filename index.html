@@ -6,6 +6,7 @@
         <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <script src="js/d3.min.js"></script>
+        <script src="data/mkad.js"></script>
         <script src="data/coords.js"></script>
         <script src="data/lines.js"></script>
         <script src="js/tokm.js"></script>
@@ -18,10 +19,22 @@
         </div>
         <div id="mapContainer">
             <svg>
-                <g id="metro">
-                    <g id="connectionsContainer"></g>
-                    <g id="stationsContainer"></g>
-                </d>
+                <g id="everything">
+                    <image id="moscow" width="1052" height="1488" x="-540" y="-760" xlink:href="data/moscow.svg" />
+                    <g id="metro">
+                        <g id="roads">
+                            <g id="mkad"></g>
+                        </g>
+                        <g id="walkability">
+                            <g id="walk20min"></g>
+                            <g id="walk15min"></g>
+                            <g id="walk10min"></g>
+                            <g id="walk5min"></g>
+                        </g>
+                        <g id="connectionsContainer"></g>
+                        <g id="stationsContainer"></g>
+                    </g>
+                </g>
             </svg>
         </div>
     </body>

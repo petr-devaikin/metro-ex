@@ -42,8 +42,30 @@ svg {
 }
 
 svg .connection {
-    stroke-width: 3;
+    stroke: black;
+    stroke-width: 1;
 }
 
 svg .station circle {
+}
+
+svg #walkability {
+    opacity: 0.8;
+}
+
+svg #walk5min {
+    opacity: 1;
+}
+
+svg #walk10min, svg #walk15min, svg #walk20min {
+    opacity: 0.2;
+}
+
+svg #roads line {
+    stroke: #eee;
+    stroke-width: 4;
+}
+
+svg #moscow {
+    opacity: 0.2;
 }

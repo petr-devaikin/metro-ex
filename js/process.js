@@ -8,6 +8,7 @@ function processStations() {
         coords[i].year = parseInt(coords[i][2].split(' ')[2]);
         coords[i].position = toPixelPosition(coords[i][4], coords[i][5]);
     }
+    coords.sort(function(a, b) { return b.year - a.year; });
 }
 
 function getLines() {

@@ -13,7 +13,7 @@ function fit() {
 }
 
 function inidDom() {
-    dom.svg = d3.select('svg');
+    dom.svg = d3.select('#mapContainer').select('svg');
     dom.metro = dom.svg.select('#metro');
 }
 
@@ -23,7 +23,7 @@ function initialize() {
 
     state.years = getPeriod();
     drawTimescale();
-    addStations();
+    //addStations();
     addWalkability();
     connectStations();
     //drawRoads();
@@ -49,15 +49,49 @@ function zoomHandler() {
 
 //drawing
 function drawTimescale() {
-    dom.years = d3.select('#timelineContainer').selectAll('.year')
+    var width = d3.select('#timelineContainer').node().offsetWidth;
+    var margin = 10;
+    var yearWidth = (width - 2 * margin) / state.years.length;
+    var weight = 7;
+
+    dom.years = d3.select('#timelineContainer svg').selectAll('.year')
             .data(state.years)
-        .enter().append('div')
+        .enter().append('g')
             .classed('year', true)
-            .style('color', function(d) {
-                return getColourOfTheYear(d, state.years[0], state.years[state.years.length - 1]);
+            .attr('transform', function(d, i) {
+                return 'translate(' + (margin + (i) * yearWidth + weight / 2) + ',10)';
             })
-            .text(function(d) { return d; })
             .on('click', function(d, i) { selectYear(i); });
+
+    dom.years.append('path')        
+        .style('color', function(d) {
+            return getColourOfTheYear(d, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('d', function(d, i) {
+            if (d == state.years[0])
+                return 'M'+weight+',0 L'+weight+','+weight*2+' L0,'+weight*2+', L0,0 Z';
+            else
+                return 'M'+weight+',0 L'+weight+','+2*weight+' L0,'+2*weight+', L0,'+weight+' ' +
+                    'L'+(-yearWidth+weight)+','+weight+' L'+(-yearWidth+weight)+',0 Z';
+        })
+        .attr('fill', function(d) {
+            return getColourOfTheYear(d, state.years[0], state.years[state.years.length - 1]);
+        })
+        .attr('stroke', function(d) {
+            return getColourOfTheYear(d, state.years[0], state.years[state.years.length - 1]);
+        });
+
+    dom.years.append('rect')
+        .attr('x', -yearWidth+weight-1)
+        .attr('y', 1)
+        .attr('width', 5)
+        .attr('height', weight - 2);
+
+    dom.years.append('text')
+        .text(function(d) { return d; })
+        .attr('y', 2*weight + 5)
+        .attr('x', 2*weight + 1)
+        .attr('transform', 'rotate(45)');
 }
 
 function drawRoads() {
@@ -114,28 +148,36 @@ function addWalkability() {
         })
         .attr('r', toPixelSize(0.333))
         .attr('cx', function(d) { return d.position.x; })
-        .attr('cy', function(d) { return d.position.y; });
+        .attr('cy', function(d) { return d.position.y; })
+        .append('svg:title')
+            .text(function(d) { return d[1] + '. ' + d[2]; });
     dom.walk10min.append('circle')
         .attr('fill', function(d) {
             return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
         })
         .attr('r', toPixelSize(0.667))
         .attr('cx', function(d) { return d.position.x; })
-        .attr('cy', function(d) { return d.position.y; });
+        .attr('cy', function(d) { return d.position.y; })
+        .append('svg:title')
+            .text(function(d) { return d[1] + '. ' + d[2]; });
     dom.walk15min.append('circle')
         .attr('fill', function(d) {
             return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
         })
         .attr('r', toPixelSize(1))
         .attr('cx', function(d) { return d.position.x; })
-        .attr('cy', function(d) { return d.position.y; });
+        .attr('cy', function(d) { return d.position.y; })
+        .append('svg:title')
+            .text(function(d) { return d[1] + '. ' + d[2]; });
     dom.walk20min.append('circle')
         .attr('fill', function(d) {
             return getColourOfTheYear(d.year, state.years[0], state.years[state.years.length - 1]);
         })
         .attr('r', toPixelSize(1.333))
         .attr('cx', function(d) { return d.position.x; })
-        .attr('cy', function(d) { return d.position.y; });
+        .attr('cy', function(d) { return d.position.y; })
+        .append('svg:title')
+            .text(function(d) { return d[1] + '. ' + d[2]; });
 }
 
 function connectStations() {
@@ -168,8 +210,8 @@ function selectYear(year) {
     dom.years.filter(function(d) { return d <= state.years[year]; })
         .classed('selected', true);
 
-    var stationsToHide = dom.stations.filter(function(d) {return d.year > state.years[year]; });
-    var stationsToShow = dom.stations.filter(function(d) { return d.year <= state.years[year]; });
+    //var stationsToHide = dom.stations.filter(function(d) {return d.year > state.years[year]; });
+    //var stationsToShow = dom.stations.filter(function(d) { return d.year <= state.years[year]; });
 
     var walksToHide = d3.selectAll('.walkArea').filter(function(d) {return d.year > state.years[year]; });
     var walksToShow = d3.selectAll('.walkArea').filter(function(d) { return d.year <= state.years[year]; });
@@ -181,12 +223,12 @@ function selectYear(year) {
         return d.year <= state.years[year] && (d.until >= state.years[year] || d.until === undefined);
     });
 
-    stationsToHide.attr('opacity', 0);
-    walksToHide.attr('opacity', 0);
-    connectionsToHide.attr('opacity', 0);
-    stationsToShow.attr('opacity', 1);
-    walksToShow.attr('opacity', 1);
-    connectionsToShow.attr('opacity', 0.05);
+    //stationsToHide.attr('opacity', 0);
+    walksToHide.attr('display', 'none');
+    connectionsToHide.attr('display', 'none');
+    //stationsToShow.attr('opacity', 1);
+    walksToShow.attr('display', 'inline');
+    connectionsToShow.attr('display', 'inline');
 }
 
 document.addEventListener("keydown", function(e) {

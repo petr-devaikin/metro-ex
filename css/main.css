@@ -31,10 +31,13 @@ body {
     stroke-width: 1;
 }
 
-#timelineContainer .year text {
-    fill: #888;
+svg text {
     font-family: Arial;
     font-size: 12px;
+}
+
+#timelineContainer .year text {
+    fill: #888;
 }
 
 #timelineContainer .year:not(.selected) text {
@@ -56,6 +59,14 @@ body {
 
 #timelineContainer .year.selected {
     background: silver;
+}
+
+#legend {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    width: 100px;
+    height: 72px;
 }
 
 #mapContainer {
